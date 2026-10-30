@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebCloner — Instant Website & Asset Archiver</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes pulse-slow {
+            0%, 100% { transform: scale(1); opacity: 0.15; }
+            50% { transform: scale(1.08); opacity: 0.25; }
+        }
+        .glow-bg {
+            animation: pulse-slow 8s infinite ease-in-out;
+        }
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background-color: #334155;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-indigo-500 selection:text-white relative overflow-x-hidden">
+
+    <!-- Background glowing gradient orb -->
+    <div class="glow-bg absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+    <!-- Header -->
+    <header class="w-full border-b border-slate-800/80 backdrop-blur-md sticky top-0 z-50 bg-slate-950/70">
+        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="h-9 w-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/25">
+                    <i class="fa-solid fa-clone text-white text-base"></i>
+                </div>
+                <span class="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">WebCloner</span>
+                <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-medium">v1.0</span>
+            </div>
+            <a href="https://github.com" id="repoLink" target="_blank" class="text-xs text-slate-400 hover:text-white flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-800 hover:border-slate-700 transition">
+                <i class="fa-brands fa-github text-sm"></i>
+                <span>GitHub</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-4xl w-full mx-auto px-6 py-12 flex flex-col gap-8">
+        
+        <!-- Hero section -->
+        <div class="text-center space-y-3">
+            <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight">
+                Clone Any Website <span class="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">with Assets</span>
+            </h1>
+            <p class="text-slate-400 text-base max-w-xl mx-auto">
+                Enter a website URL. Our cloner deep crawls HTML, CSS (including embedded fonts & images), JS scripts, and images, rewrites all paths to relative, and bundles everything into an offline-ready ZIP.
+            </p>
+        </div>
+
+        <!-- Form Card -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
+            <form id="cloneForm" class="space-y-6">
+                <div>
+                    <label for="url" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Target Website URL</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500">
+                            <i class="fa-solid fa-globe"></i>
+                        </div>
+                        <input 
+                            type="url" 
+                            id="url" 
+                            name="url" 
+                            placeholder="https://example.com" 
+                            required 
+                            class="w-full bg-slate-950/80 border border-slate-700/80 rounded-xl py-3.5 pl-11 pr-4 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-inner"
+                        />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="maxPages" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Max Pages to Crawl</label>
+                        <select id="maxPages" class="w-full bg-slate-950/80 border border-slate-700/80 rounded-xl py-3 px-3.5 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                            <option value="1">1 page (Landing Page only)</option>
+                            <option value="5" selected>Up to 5 pages (Recommended)</option>
+                            <option value="15">Up to 15 pages</option>
+                            <option value="30">Up to 30 pages</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-end">
+                        <button 
+                            type="submit" 
+                            id="submitBtn" 
+                            class="w-full bg-gradient-to-r from-indigo-500 hover:from-indigo-600 to-purple-600 hover:to-purple-700 text-white font-medium py-3.5 px-6 rounded-xl transition duration-200 flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i class="fa-solid fa-bolt"></i>
+                            <span>Start Cloning</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Status & Live Terminal Output -->
+            <div id="statusSection" class="mt-8 hidden space-y-4">
+                <div class="flex items-center justify-between border-t border-slate-800/80 pt-6">
+                    <div class="flex items-center gap-3">
+                        <div id="statusSpinner" class="animate-spin text-indigo-400">
+                            <i class="fa-solid fa-circle-notch text-lg"></i>
+                        </div>
+                        <span id="statusText" class="text-sm font-medium text-slate-300">Initializing clone process...</span>
+                    </div>
+                    <span id="statusTimer" class="text-xs font-mono text-slate-500">0s</span>
+                </div>
+
+                <!-- Terminal window -->
+                <div class="bg-black/80 border border-slate-800 rounded-xl p-4 font-mono text-xs">
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-800/60 mb-3 text-slate-500">
+                        <div class="flex gap-1.5">
+                            <div class="w-2.5 h-2.5 rounded-full bg-red-500/80"></div>
+                            <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/80"></div>
+                            <div class="w-2.5 h-2.5 rounded-full bg-green-500/80"></div>
+                        </div>
+                        <span>live cloner logs</span>
+                    </div>
+                    <div id="terminalLogs" class="custom-scroll max-h-56 overflow-y-auto space-y-1 text-slate-300"></div>
+                </div>
+
+                <!-- Download Card -->
+                <div id="downloadCard" class="hidden p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-file-zipper"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-emerald-300">Clone Ready!</h4>
+                            <p class="text-xs text-slate-400">Complete website package with assets ready for offline browsing.</p>
+                        </div>
+                    </div>
+                    <a id="downloadBtn" href="#" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-lg text-sm flex items-center gap-2 transition shadow-lg shadow-emerald-500/20">
+                        <i class="fa-solid fa-download"></i>
+                        <span>Download ZIP</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features list -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+            <div class="p-4 rounded-xl bg-slate-900/40 border border-slate-800/60">
+                <i class="fa-solid fa-images text-indigo-400 text-lg mb-2"></i>
+                <h3 class="text-sm font-semibold text-white">Full Asset Extraction</h3>
+                <p class="text-xs text-slate-400 mt-1">Downloads CSS, JS, images, svgs, and fonts, mapping internal links so offline viewing works seamlessly.</p>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-900/40 border border-slate-800/60">
+                <i class="fa-solid fa-code text-purple-400 text-lg mb-2"></i>
+                <h3 class="text-sm font-semibold text-white">Relative Path Rewriting</h3>
+                <p class="text-xs text-slate-400 mt-1">Rewrites both HTML tags and nested CSS <code>url(...)</code> definitions to direct local relative files.</p>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-900/40 border border-slate-800/60">
+                <i class="fa-solid fa-cloud-arrow-down text-pink-400 text-lg mb-2"></i>
+                <h3 class="text-sm font-semibold text-white">Direct ZIP Bundler</h3>
+                <p class="text-xs text-slate-400 mt-1">Packages everything on-the-fly and downloads straight to your computer in one compressed archive.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="mt-auto border-t border-slate-800/60 py-6 text-center text-xs text-slate-500">
+        WebCloner Service &bull; Open-source web archiver
+    </footer>
+
+    <script>
+        const form = document.getElementById('cloneForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const statusSection = document.getElementById('statusSection');
+        const statusSpinner = document.getElementById('statusSpinner');
+        const statusText = document.getElementById('statusText');
+        const statusTimer = document.getElementById('statusTimer');
+        const terminalLogs = document.getElementById('terminalLogs');
+        const downloadCard = document.getElementById('downloadCard');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        let timerInterval = null;
+        let startTime = 0;
+
+        function appendLog(text) {
+            const line = document.createElement('div');
+            line.className = 'font-mono leading-relaxed';
+            line.textContent = text;
+            terminalLogs.appendChild(line);
+            terminalLogs.scrollTop = terminalLogs.scrollHeight;
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const url = document.getElementById('url').value.trim();
+            const maxPages = parseInt(document.getElementById('maxPages').value, 10);
+
+            if (!url) return;
+
+            // UI state
+            submitBtn.disabled = true;
+            statusSection.classList.remove('hidden');
+            downloadCard.classList.add('hidden');
+            terminalLogs.innerHTML = '';
+            statusSpinner.innerHTML = '<i class="fa-solid fa-circle-notch text-lg"></i>';
+            statusSpinner.className = "animate-spin text-indigo-400";
+            statusText.textContent = "Connecting to website & starting crawler...";
+            
+            startTime = Date.now();
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                statusTimer.textContent = `${elapsed}s`;
+            }, 1000);
+
+            try {
+                // Initialize job
+                const resp = await fetch('/api/clone', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url, max_pages: maxPages })
+                });
+
+                if (!resp.ok) {
+                    const err = await resp.json();
+                    throw new Error(err.detail || 'Failed to start cloning');
+                }
+
+                const data = await resp.json();
+                const jobId = data.job_id;
+
+                // Listen to SSE progress
+                const eventSource = new EventSource(`/api/progress/${jobId}`);
+
+                eventSource.onmessage = (event) => {
+                    const msg = JSON.parse(event.data);
+                    if (msg.log) {
+                        appendLog(msg.log);
+                        statusText.textContent = msg.log.replace(/^[^\w\s]+/, '').trim();
+                    }
+                    if (msg.status === 'completed') {
+                        eventSource.close();
+                        clearInterval(timerInterval);
+                        statusSpinner.className = "text-emerald-400";
+                        statusSpinner.innerHTML = '<i class="fa-solid fa-circle-check text-lg"></i>';
+                        statusText.textContent = "Website cloned successfully!";
+                        downloadBtn.href = `/api/download/${jobId}`;
+                        downloadCard.classList.remove('hidden');
+                        submitBtn.disabled = false;
+                    } else if (msg.status === 'failed') {
+                        eventSource.close();
+                        clearInterval(timerInterval);
+                        statusSpinner.className = "text-rose-400";
+                        statusSpinner.innerHTML = '<i class="fa-solid fa-circle-xmark text-lg"></i>';
+                        statusText.textContent = `Error: ${msg.error || 'Cloning failed'}`;
+                        submitBtn.disabled = false;
+                    }
+                };
+
+                eventSource.onerror = () => {
+                    eventSource.close();
+                    clearInterval(timerInterval);
+                    submitBtn.disabled = false;
+                };
+
+            } catch (err) {
+                clearInterval(timerInterval);
+                submitBtn.disabled = false;
+                statusSpinner.className = "text-rose-400";
+                statusSpinner.innerHTML = '<i class="fa-solid fa-circle-xmark text-lg"></i>';
+                statusText.textContent = err.message;
+                appendLog(`❌ Error: ${err.message}`);
+            }
+        });
+    </script>
+</body>
+</html>
